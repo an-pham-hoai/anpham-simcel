@@ -1,1 +1,10 @@
 npm i -g @nestjs/cli
+nest new backend
+cd backend
+npm install @nestjs/mongoose mongoose
+
+ng new frontend
+cd frontend
+npm install @angular/material
+
+ng generate component inventory
