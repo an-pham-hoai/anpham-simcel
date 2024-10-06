@@ -8,3 +8,5 @@ cd frontend
 npm install @angular/material
 
 ng generate component inventory
+
+docker-compose up -d --build

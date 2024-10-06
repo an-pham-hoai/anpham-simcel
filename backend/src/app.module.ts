@@ -1,17 +1,50 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { InventoryModule } from './inventory/inventory.module';
 import { OrderModule } from './order/order.module';
 import { ReportModule } from './report/report.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SeedService } from './seed/seed.service';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/warehouse'),
+    ConfigModule.forRoot({
+      isGlobal: true, // This makes the config available globally
+      envFilePath: '.env', // Load environment variables from the .env file
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_CONNECTION_STRING') || process.env.MONGO_CONNECTION_STRING, //mongodb://localhost:27017/warehouse
+      }),
+      inject: [ConfigService],
+    }),
+    // Configure rate limiting globally
+    ThrottlerModule.forRoot([{
+      ttl: 60000, // Time-to-live for rate limit (in milliseconds)
+      limit: 10, // Maximum number of requests within the ttl
+    }]),
     InventoryModule,
     OrderModule,
     ReportModule,
     AuthModule
   ],
+  providers: [
+    // Apply the throttler guard globally
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    SeedService
+  ],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private readonly seedService: SeedService) {}
+
+  async onModuleInit() {
+    await this.seedService.seed();  // Run seed on startup
+  }
+}

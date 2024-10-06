@@ -1,54 +1,86 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { ClientSession, Model, SortOrder } from 'mongoose';
 import { Order } from './schemas/order.schema';
 import { InventoryService } from '../inventory/inventory.service';
 import { WrapperResponse } from 'src/common/wrapper-response';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<Order>,
     private readonly inventoryService: InventoryService,
-  ) {}
+  ) { }
 
-  async createOrder(orderDto: any): Promise<WrapperResponse<Order>> {
+  async create(createOrderDto: CreateOrderDto): Promise<any> {
+    const session: ClientSession = await this.orderModel.db.startSession(); // Start a session
+
     try {
-      const createdOrder = new this.orderModel(orderDto);
-      await createdOrder.save();
+      // Begin the transaction
+      session.startTransaction();
 
-      // Adjust the inventory based on the ordered items
-      for (const item of orderDto.items) {
-        const inventoryResponse = await this.inventoryService.findOne(item.sku);
-        if (!inventoryResponse.success) {
+      // 1. Create the order
+      const newOrder = new this.orderModel(createOrderDto);
+      const createdOrder = await newOrder.save({ session });
+
+      // 2. Update the inventory quantities
+      for (const item of createOrderDto.items) {
+        const inventoryItem = await this.inventoryService.findOne(item.sku);
+
+        if (!inventoryItem.data) {
+          // Return a structured error response if inventory item is not found
           return {
             success: false,
+            data: null,
             error: {
               code: 'ITEM_NOT_FOUND',
-              message: `Item with SKU ${item.sku} not found`,
+              message: `Inventory item with SKU ${item.sku} not found.`,
             },
-            data: null,
           };
         }
 
-        const inventoryItem = inventoryResponse.data;
-        inventoryItem.quantity -= item.quantity;
-        await inventoryItem.save();
+        // Check if there's enough stock before deduction
+        if (inventoryItem.data.quantity < item.quantity) {
+          return {
+            success: false,
+            data: null,
+            error: {
+              code: 'INSUFFICIENT_STOCK',
+              message: `Insufficient stock for item with SKU ${item.sku}.`,
+            },
+          };
+        }
+
+        // Deduct the quantity from the inventory
+        inventoryItem.data.quantity -= item.quantity;
+
+        // Save the updated inventory item within the transaction
+        await inventoryItem.data.save({ session });
       }
+
+      // Commit the transaction if everything goes well
+      await session.commitTransaction();
+      session.endSession();
 
       return {
         success: true,
-        error: null,
         data: createdOrder,
+        error: null,
       };
+
     } catch (error) {
+      // If something went wrong, abort the transaction
+      await session.abortTransaction();
+      session.endSession();
+
       return {
         success: false,
+        data: null,
         error: {
           code: 'ORDER_CREATION_FAILED',
-          message: 'Failed to create order',
+          message: error.message || 'Order creation failed due to an internal error.',
         },
-        data: null,
       };
     }
   }
@@ -84,22 +116,55 @@ export class OrderService {
     }
   }
 
-  async getAllOrders(): Promise<WrapperResponse<Order[]>> {
+  async findAll(
+    page: number = 1,   // Default to page 1
+    size: number = 10,  // Default size to 10 items per page
+    sortBy: string = 'createdAt', // Default sort by createdAt field
+    sortOrder: string = 'asc',    // Default sort order is ascending
+    search: string = '',          // Optional search term for filtering
+  ): Promise<any> {
     try {
-      const orders = await this.orderModel.find().exec();
+      const skip = (page - 1) * size;
+      const sortOptions = { [sortBy]: sortOrder === 'asc' ? <SortOrder>'asc' : <SortOrder>'desc' };
+
+      // Build the filter query based on search input
+      const searchQuery = search
+        ? {
+          $or: [
+            { orderNumber: { $regex: search, $options: 'i' } },  // Case-insensitive search on orderNumber
+            { customerName: { $regex: search, $options: 'i' } }, // Case-insensitive search on customerName
+            { status: { $regex: search, $options: 'i' } },       // Case-insensitive search on status
+          ],
+        }
+        : {};
+
+      // Get total count of documents with the search filter applied
+      const total = await this.orderModel.countDocuments(searchQuery);
+
+      // Get paginated and filtered data
+      const items = await this.orderModel
+        .find(searchQuery)
+        .skip(skip)   // Skip the first 'n' documents
+        .limit(size)  // Limit the number of results
+        .sort(sortOptions) // Sort by the specified field and order
+        .exec();
+
+      // Return success response
       return {
         success: true,
+        data: items,
         error: null,
-        data: orders,
       };
-    } catch (error) {
+    }
+    catch (error) {
+      // Handle any errors during fetching
       return {
         success: false,
-        error: {
-          code: 'ORDER_FETCH_FAILED',
-          message: 'Failed to fetch orders',
-        },
         data: null,
+        error: {
+          code: 'FETCH_ERROR',
+          message: error.message || 'An error occurred while fetching inventory items.',
+        },
       };
     }
   }

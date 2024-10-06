@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, SortOrder } from 'mongoose';
 import { Inventory } from './schemas/inventory.schema';
 import { successResponse, errorResponse, WrapperResponse } from '../common/wrapper-response';
 
@@ -8,17 +8,62 @@ import { successResponse, errorResponse, WrapperResponse } from '../common/wrapp
 export class InventoryService {
   constructor(@InjectModel(Inventory.name) private inventoryModel: Model<Inventory>) {}
 
-  async findAll(page: number, size: number): Promise<WrapperResponse<any>> {
+  /**
+   * Find all inventory items with pagination, sorting, and optional search.
+   * @param page The page number (default is 1).
+   * @param size The number of items per page (default is 10).
+   * @param sortBy The field to sort by (default is 'createdAt').
+   * @param sortOrder The sort order ('asc' for ascending, 'desc' for descending).
+   * @param search Optional search term to filter items by name, sku, or location.
+   */
+  async findAll(
+    page: number = 1,       // Default to page 1
+    size: number = 10,      // Default size to 10 items per page
+    sortBy: string = 'createdAt', // Default sort by 'createdAt' field
+    sortOrder: string = 'asc',    // Default sort order is ascending
+    search: string = '',    // Optional search term for filtering
+  ): Promise<any> {
     try {
+      const skip = (page - 1) * size;
+
+      // Build the filter object to search by name, sku, or location
+      const filter = search
+        ? {
+            $or: [
+              { name: { $regex: search, $options: 'i' } },      // Case-insensitive search for name
+              { sku: { $regex: search, $options: 'i' } },       // Case-insensitive search for sku
+              { location: { $regex: search, $options: 'i' } },  // Case-insensitive search for location
+            ],
+          }
+        : {};
+
+      // Build sort options
+      const sortOptions = { [sortBy]: sortOrder === 'asc' ? <SortOrder>'asc' : 'desc' };
+
+      // Fetch the inventory items from the database with pagination, filtering, and sorting
       const items = await this.inventoryModel
-        .find()
-        .skip((page - 1) * size)
+        .find(filter)
+        .sort(sortOptions)
         .limit(size)
+        .skip(skip)
         .exec();
-      const total = await this.inventoryModel.countDocuments().exec();
-      return successResponse({ items, total });
+
+      // Return success response
+      return {
+        success: true,
+        data: items,
+        error: null,
+      };
     } catch (error) {
-      return errorResponse('DATABASE_ERROR', 'An error occurred while fetching the inventory items.');
+      // Handle any errors during fetching
+      return {
+        success: false,
+        data: null,
+        error: {
+          code: 'FETCH_ERROR',
+          message: error.message || 'An error occurred while fetching inventory items.',
+        },
+      };
     }
   }
 
@@ -30,15 +75,20 @@ export class InventoryService {
     return successResponse(item);
   }
 
-  async create(item: Inventory): Promise<WrapperResponse<Inventory>> {
+  async create(item: any): Promise<WrapperResponse<Inventory>> {
     try {
+      const existingItem = await this.inventoryModel.findOne({ sku: item.sku }).exec();
+      if (existingItem) {
+        return errorResponse('SKU_EXISTS', 'An item with the provided SKU already exists.');
+      }
+  
       const newItem = new this.inventoryModel(item);
       const savedItem = await newItem.save();
       return successResponse(savedItem);
     } catch (error) {
       return errorResponse('DATABASE_ERROR', 'An error occurred while creating the item.');
     }
-  }
+  }  
 
   async update(id: string, item: Partial<Inventory>): Promise<WrapperResponse<Inventory>> {
     const updatedItem = await this.inventoryModel.findByIdAndUpdate(id, item, { new: true }).exec();

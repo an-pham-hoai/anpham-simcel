@@ -1,42 +1,51 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, Version, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, Version, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { Inventory } from './schemas/inventory.schema';
 import { WrapperResponse } from '../common/wrapper-response';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CreateInventoryDto } from './dto/create-inventory.dto';
+import { UpdateInventoryDto } from './dto/update-inventory.dto';
 
 @Controller('inventory')
 @UseGuards(JwtAuthGuard)  // Protect all routes
 export class InventoryController {
-  constructor(private readonly inventoryService: InventoryService) {}
+  constructor(private readonly inventoryService: InventoryService) { }
 
   // Version 1 of the API
   // Version 1 (/v1/inventory) will use findAllV1()
-  // GET http://localhost:3000/v1/inventory?page=1&size=10
   @Version('1')
   @Get()
   async findAllV1(
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
-  ): Promise<WrapperResponse<any>> {
-    return this.inventoryService.findAll(page, size);
+    @Query('sortBy') sortBy: string = 'createdAt',
+    @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'asc',
+    @Query('search') search: string = '',
+  ): Promise<any> {
+    return this.inventoryService.findAll(page, size, sortBy, sortOrder, search);
   }
 
   // Version 2 of the API
   // Version 2 (/v2/inventory) will use findAllV2()
-  // GET http://localhost:3000/v2/inventory?page=1&size=10
   @Version('2')
   @Get()
   async findAllV2(
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
+    @Query('sortBy') sortBy: string = 'createdAt',
+    @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'asc',
+    @Query('search') search: string = '',
   ): Promise<any> {
-    const response = await this.inventoryService.findAll(page, size);
+    const response = await this.inventoryService.findAll(page, size, sortBy, sortOrder, search);
     // Modify the response structure in v2, for example.
     return {
       ...response,
       meta: {
         page,
         size,
+        sortBy,
+        sortOrder,
+        search,
         totalItems: response.data?.total,
       },
     };
@@ -62,17 +71,21 @@ export class InventoryController {
     return item;
   }
 
+  @Version('1')
   @Post()
-  async create(@Body() item: Inventory): Promise<WrapperResponse<Inventory>> {
-    return this.inventoryService.create(item);
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  async create(@Body() createInventoryDto: CreateInventoryDto): Promise<WrapperResponse<Inventory>> {
+    return this.inventoryService.create(createInventoryDto);
   }
 
+  @Version('1')
   @Put(':id')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async update(
     @Param('id') id: string,
-    @Body() item: Partial<Inventory>,
+    @Body() updateInventoryDto: UpdateInventoryDto,
   ): Promise<WrapperResponse<Inventory>> {
-    return this.inventoryService.update(id, item);
+    return this.inventoryService.update(id, updateInventoryDto);
   }
 
   @Delete(':id')

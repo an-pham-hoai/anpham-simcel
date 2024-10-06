@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 import * as mongoose from 'mongoose';  // Import mongoose for ObjectId
 import { Inventory } from '../../inventory/schemas/inventory.schema';
 
-@Schema()
+@Schema({ timestamps: true })  // Enable timestamps
 export class Order extends Document {
   @Prop({ required: true })
   orderNumber: string;
