@@ -103,16 +103,9 @@ export class InventoryService {
     return successResponse(inventoryItem);
   }
 
-  /* async update(id: string, item: Partial<Inventory>): Promise<WrapperResponse<Inventory>> {
-    const updatedItem = await this.inventoryModel.findByIdAndUpdate(id, item, { new: true }).exec();
-    if (!updatedItem) {
-      return errorResponse('ITEM_NOT_FOUND', 'The item to update was not found.');
-    }
-    return successResponse(updatedItem);
-  } */
+  async delete(sku: string): Promise<WrapperResponse<null>> {
+    const result = await this.inventoryModel.findOneAndDelete({ sku }); // Use SKU instead of _id
 
-  async delete(id: string): Promise<WrapperResponse<null>> {
-    const result = await this.inventoryModel.findByIdAndDelete(id).exec();
     if (!result) {
       return errorResponse('ITEM_NOT_FOUND', 'The item to delete was not found.');
     }

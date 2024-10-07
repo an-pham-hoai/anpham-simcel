@@ -40,11 +40,11 @@ export class InventoryDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isEdit = !!this.data; // If data exists, we are in edit mode
+    this.isEdit = !!this.data; // Check if data exists, indicating edit mode
     if (this.isEdit) {
       // Bind the received data to the inventory object
-      this.inventory = { ...this.data };
-      console.log('edit mode', this.inventory);
+      this.inventory = { ...this.data }; // Copy properties for editing
+      console.log('Edit mode', this.inventory);
     }
   }
 

@@ -99,6 +99,7 @@ export class InventoryController {
     return this.inventoryService.update(id, updateInventoryDto);
   }
 
+  @Version('1')
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<WrapperResponse<null>> {
     return this.inventoryService.delete(id);

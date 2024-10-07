@@ -52,6 +52,18 @@ export class InventoryComponent implements OnInit {
     this.loadInventory();
   }
 
+  openCreateDialog() {
+    const dialogRef = this.dialog.open(InventoryDialogComponent, {
+      width: '400px',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadInventory(); // Reload inventories if a new one was created
+      }
+    });
+  }
+
   onEditInventory(inventory: Inventory): void {
 
     this.inventoryService.getInventoryById(inventory.sku).subscribe({

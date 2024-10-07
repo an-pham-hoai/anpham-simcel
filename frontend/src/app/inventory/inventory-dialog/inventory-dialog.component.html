@@ -1,29 +1,28 @@
+<!-- inventory-dialog.component.html -->
 <h2 mat-dialog-title>{{ isEdit ? 'Edit Inventory' : 'Create Inventory' }}</h2>
-<div mat-dialog-content>
-  <mat-form-field appearance="outline" class="full-width">
+<mat-dialog-content>
+  <mat-form-field appearance="fill">
     <mat-label>SKU</mat-label>
-    <input matInput [(ngModel)]="inventory.sku" placeholder="Enter SKU" />
+    <input matInput [(ngModel)]="inventory.sku" required disabled />
   </mat-form-field>
-
-  <mat-form-field appearance="outline" class="full-width">
+  
+  <mat-form-field appearance="fill">
     <mat-label>Name</mat-label>
-    <input matInput [(ngModel)]="inventory.name" placeholder="Enter name" />
+    <input matInput [(ngModel)]="inventory.name" required />
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="full-width">
+  <mat-form-field appearance="fill">
     <mat-label>Quantity</mat-label>
-    <input matInput type="number" [(ngModel)]="inventory.quantity" placeholder="Enter quantity" />
+    <input matInput [(ngModel)]="inventory.quantity" type="number" required />
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="full-width">
+  <mat-form-field appearance="fill">
     <mat-label>Location</mat-label>
-    <input matInput [(ngModel)]="inventory.location" placeholder="Enter location" />
+    <input matInput [(ngModel)]="inventory.location" required />
   </mat-form-field>
-</div>
+</mat-dialog-content>
 
-<div mat-dialog-actions align="end">
+<mat-dialog-actions>
   <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="save()">
-    {{ isEdit ? 'Update' : 'Create' }}
-  </button>
-</div>
+  <button mat-button color="primary" (click)="save()">{{ isEdit ? 'Update' : 'Create' }}</button>
+</mat-dialog-actions>
