@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SeedService } from './seed/seed.service';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { APP_GUARD } from '@nestjs/core';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_CONNECTION_STRING') || process.env.MONGO_CONNECTION_STRING, //mongodb://localhost:27017/warehouse
+        uri: configService.get<string>('MONGO_CONNECTION_STRING') || 
+        process.env.MONGO_CONNECTION_STRING, //mongodb://localhost:27017/simceldb
       }),
       inject: [ConfigService],
     }),
@@ -30,7 +32,8 @@ import { APP_GUARD } from '@nestjs/core';
     InventoryModule,
     OrderModule,
     ReportModule,
-    AuthModule
+    AuthModule,
+    SeedModule,
   ],
   providers: [
     // Apply the throttler guard globally
@@ -38,7 +41,6 @@ import { APP_GUARD } from '@nestjs/core';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
-    SeedService
   ],
 })
 export class AppModule implements OnModuleInit {

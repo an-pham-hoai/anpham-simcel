@@ -5,7 +5,10 @@ import { Order } from './schemas/order.schema';
 import { WrapperResponse } from 'src/common/wrapper-response';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Throttle } from '@nestjs/throttler';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('orders')  // Grouping in Swagger
+@ApiBearerAuth()    // Secure the controller with Bearer Token (JWT)
 @Controller('orders')
 @UseGuards(JwtAuthGuard)  // Protect the entire controller with JWT guard
 export class OrderController {

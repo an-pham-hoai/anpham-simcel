@@ -1,0 +1,40 @@
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #67b26f, #4ca2cd);
+    color: white;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+.login-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 400px;
+}
+
+.form-field {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.login-button {
+    width: 100%;
+}
+
+.loading-spinner {
+    margin-right: 8px;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}

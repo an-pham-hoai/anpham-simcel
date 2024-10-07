@@ -5,6 +5,7 @@ import { WrapperResponse } from '../common/wrapper-response';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('inventory')
 @UseGuards(JwtAuthGuard)  // Protect all routes
@@ -15,6 +16,11 @@ export class InventoryController {
   // Version 1 (/v1/inventory) will use findAllV1()
   @Version('1')
   @Get()
+  @ApiQuery({ name: 'page', required: false, description: 'Page number', example: 1 })
+  @ApiQuery({ name: 'size', required: false, description: 'Page size', example: 10 })
+  @ApiQuery({ name: 'sortBy', required: false, description: 'Sort by field', example: 'createdAt' })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'], description: 'Sort order', example: 'asc' })
+  @ApiQuery({ name: 'search', required: false, description: 'Search query', example: 'laptop' })
   async findAllV1(
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
@@ -29,6 +35,11 @@ export class InventoryController {
   // Version 2 (/v2/inventory) will use findAllV2()
   @Version('2')
   @Get()
+  @ApiQuery({ name: 'page', required: false, description: 'Page number', example: 1 })
+  @ApiQuery({ name: 'size', required: false, description: 'Page size', example: 10 })
+  @ApiQuery({ name: 'sortBy', required: false, description: 'Sort by field', example: 'createdAt' })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'], description: 'Sort order', example: 'asc' })
+  @ApiQuery({ name: 'search', required: false, description: 'Search query', example: 'laptop' })
   async findAllV2(
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,

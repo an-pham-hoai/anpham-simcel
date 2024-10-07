@@ -10,3 +10,5 @@ npm install @angular/material
 ng generate component inventory
 
 docker-compose up -d --build
+
+ng serve -o --poll 2000 --host 0.0.0.0 --disable-host-check

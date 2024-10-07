@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, SortOrder } from 'mongoose';
 import { Order } from './schemas/order.schema';
@@ -8,21 +8,18 @@ import { CreateOrderDto } from './dto/create-order.dto';
 
 @Injectable()
 export class OrderService {
+  private readonly logger = new Logger(OrderService.name);
+
   constructor(
     @InjectModel(Order.name) private orderModel: Model<Order>,
     private readonly inventoryService: InventoryService,
   ) { }
 
   async create(createOrderDto: CreateOrderDto): Promise<any> {
-    const session: ClientSession = await this.orderModel.db.startSession(); // Start a session
-
     try {
-      // Begin the transaction
-      session.startTransaction();
-
       // 1. Create the order
       const newOrder = new this.orderModel(createOrderDto);
-      const createdOrder = await newOrder.save({ session });
+      const createdOrder = await newOrder.save();
 
       // 2. Update the inventory quantities
       for (const item of createOrderDto.items) {
@@ -56,12 +53,8 @@ export class OrderService {
         inventoryItem.data.quantity -= item.quantity;
 
         // Save the updated inventory item within the transaction
-        await inventoryItem.data.save({ session });
+        await inventoryItem.data.save();
       }
-
-      // Commit the transaction if everything goes well
-      await session.commitTransaction();
-      session.endSession();
 
       return {
         success: true,
@@ -70,9 +63,7 @@ export class OrderService {
       };
 
     } catch (error) {
-      // If something went wrong, abort the transaction
-      await session.abortTransaction();
-      session.endSession();
+      this.logger.log(error);
 
       return {
         success: false,

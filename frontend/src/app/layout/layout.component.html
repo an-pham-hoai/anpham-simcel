@@ -1,0 +1,22 @@
+<!-- src/app/layout/layout.component.html -->
+<mat-sidenav-container class="sidenav-container">
+    <mat-sidenav mode="side" opened>
+        <mat-nav-list>
+            <a mat-list-item routerLink="/" routerLinkActive="active">Home</a>
+            <a mat-list-item routerLink="/inventory" routerLinkActive="active">Inventory</a>
+            <a mat-list-item routerLink="/order" routerLinkActive="active">Order</a>
+        </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+        <mat-toolbar color="primary">
+            <span>My Application</span>
+        </mat-toolbar>
+        <router-outlet></router-outlet>
+        <footer>
+            <mat-toolbar color="primary">
+                <span>Footer Content</span>
+            </mat-toolbar>
+        </footer>
+    </mat-sidenav-content>
+</mat-sidenav-container>

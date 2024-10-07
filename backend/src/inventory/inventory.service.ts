@@ -6,7 +6,7 @@ import { successResponse, errorResponse, WrapperResponse } from '../common/wrapp
 
 @Injectable()
 export class InventoryService {
-  constructor(@InjectModel(Inventory.name) private inventoryModel: Model<Inventory>) {}
+  constructor(@InjectModel(Inventory.name) private inventoryModel: Model<Inventory>) { }
 
   /**
    * Find all inventory items with pagination, sorting, and optional search.
@@ -29,12 +29,12 @@ export class InventoryService {
       // Build the filter object to search by name, sku, or location
       const filter = search
         ? {
-            $or: [
-              { name: { $regex: search, $options: 'i' } },      // Case-insensitive search for name
-              { sku: { $regex: search, $options: 'i' } },       // Case-insensitive search for sku
-              { location: { $regex: search, $options: 'i' } },  // Case-insensitive search for location
-            ],
-          }
+          $or: [
+            { name: { $regex: search, $options: 'i' } },      // Case-insensitive search for name
+            { sku: { $regex: search, $options: 'i' } },       // Case-insensitive search for sku
+            { location: { $regex: search, $options: 'i' } },  // Case-insensitive search for location
+          ],
+        }
         : {};
 
       // Build sort options
@@ -81,22 +81,35 @@ export class InventoryService {
       if (existingItem) {
         return errorResponse('SKU_EXISTS', 'An item with the provided SKU already exists.');
       }
-  
+
       const newItem = new this.inventoryModel(item);
       const savedItem = await newItem.save();
       return successResponse(savedItem);
     } catch (error) {
       return errorResponse('DATABASE_ERROR', 'An error occurred while creating the item.');
     }
-  }  
+  }
 
-  async update(id: string, item: Partial<Inventory>): Promise<WrapperResponse<Inventory>> {
+  async update(sku: string, updateData: Partial<Inventory>): Promise<WrapperResponse<Inventory>> {
+    const inventoryItem = await this.inventoryModel.findOneAndUpdate({ sku }, updateData, {
+      new: true, // Return the updated document
+      runValidators: true, // Ensure validators are run
+    });
+
+    if (!inventoryItem) {
+      return errorResponse('ITEM_NOT_FOUND', 'The item to update was not found.');
+    }
+
+    return successResponse(inventoryItem);
+  }
+
+  /* async update(id: string, item: Partial<Inventory>): Promise<WrapperResponse<Inventory>> {
     const updatedItem = await this.inventoryModel.findByIdAndUpdate(id, item, { new: true }).exec();
     if (!updatedItem) {
       return errorResponse('ITEM_NOT_FOUND', 'The item to update was not found.');
     }
     return successResponse(updatedItem);
-  }
+  } */
 
   async delete(id: string): Promise<WrapperResponse<null>> {
     const result = await this.inventoryModel.findByIdAndDelete(id).exec();
