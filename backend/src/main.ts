@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import helmet from 'helmet';  // For basic security hardening
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 
 const allowedOrigins = [
   'http://localhost:4200',
@@ -64,6 +65,8 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(3000);
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('PORT') || 3000; // Default to 3000 if not specified
+  await app.listen(port);
 }
 bootstrap();
