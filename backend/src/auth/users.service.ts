@@ -7,7 +7,7 @@ export class UsersService {
   // Mock user data with hashed passwords
   private readonly users = [
     { id: 1, username: 'admin', password: '34d1f91fb2e514b8576fab1a75a89a6b' }, //password hash of 'go'
-    { id: 2, username: 'user', password: 'ab86a1e1ef70dff97959067b723c5c24' }, ///password hash of 'me'
+    { id: 2, username: 'user', password: 'ab86a1e1ef70dff97959067b723c5c24' }, //password hash of 'me'
   ];
 
   async validateUser(username: string, password: string): Promise<any> {

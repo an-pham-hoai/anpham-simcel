@@ -104,4 +104,10 @@ export class InventoryController {
   async delete(@Param('id') id: string): Promise<WrapperResponse<null>> {
     return this.inventoryService.delete(id);
   }
+
+  @Version('1')
+  @Get('check-sku/:sku')
+  async checkSkuUnique(@Param('sku') sku: string): Promise<boolean> {
+    return this.inventoryService.isSkuUnique(sku);
+  }
 }

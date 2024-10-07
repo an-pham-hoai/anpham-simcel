@@ -111,4 +111,11 @@ export class InventoryService {
     }
     return successResponse(null);
   }
+
+  // Method to check if a SKU is unique
+  async isSkuUnique(sku: string): Promise<boolean> {
+    const inventoryItem = await this.inventoryModel.findOne({ sku: { $regex: new RegExp(`^${sku}$`, 'i') } }).exec();
+    // Return true if SKU is unique (i.e., not found in the database)
+    return !inventoryItem;
+  }
 }

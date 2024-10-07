@@ -20,6 +20,11 @@ export class InventoryService {
     return this.http.get<Inventory>(`${this.baseUrl}/${sku}`);
   }
 
+  // Check if SKU is unique
+  checkSkuUnique(sku: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.baseUrl}/check-sku/${sku}`);
+  }
+
   createInventory(inventory: Inventory): Observable<Inventory> {
     return this.http.post<Inventory>(this.baseUrl, inventory);
   }

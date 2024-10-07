@@ -10,9 +10,9 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
-    console.log('validateUser', username, pass);
+    //console.log('validateUser', username, pass);
     const user = await this.usersService.findOne(username);
-    console.log('user', user);
+    //console.log('user', user);
 
     if (user && pass === user.password) {  
       const { password, ...result } = user; //remove password before return

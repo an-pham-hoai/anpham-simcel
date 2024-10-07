@@ -8,6 +8,7 @@ import { InventoryDialogComponent } from './inventory-dialog/inventory-dialog.co
 import { CommonModule } from '@angular/common';
 import { MatSortModule } from '@angular/material/sort';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   standalone: true,
@@ -19,6 +20,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatPaginatorModule,  // Ensure MatPaginatorModule is imported
     MatTableModule,
     MatSortModule,
+    MatButtonModule,
     // Add other Material modules as needed
   ],
 })
@@ -42,7 +44,7 @@ export class InventoryComponent implements OnInit {
   loadInventory(): void {
     this.inventoryService.getInventories(this.pageIndex + 1, this.pageSize).subscribe(response => {
       this.dataSource.data = response.data;
-      this.totalItems = response.meta.totalItems;
+      this.totalItems = this.dataSource.data.length;
     });
   }
 
