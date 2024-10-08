@@ -1,0 +1,12 @@
+.mat-sidenav {
+    background-color: rgb(31 41 55);
+}
+
+.white {
+    color: white;
+    border-radius: 20px;
+    padding-left: 20px;
+    width: 100%;
+    display: block;
+    cursor: pointer;
+}
