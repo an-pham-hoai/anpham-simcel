@@ -17,11 +17,11 @@ export class InventoryService {
    * @param search Optional search term to filter items by name, sku, or location.
    */
   async findAll(
-    page: number = 1,       // Default to page 1
-    size: number = 10,      // Default size to 10 items per page
-    sortBy: string = 'createdAt', // Default sort by 'createdAt' field
-    sortOrder: string = 'asc',    // Default sort order is ascending
-    search: string = '',    // Optional search term for filtering
+    page: number = 1,
+    size: number = 10,
+    sortBy: string = 'createdAt',
+    sortOrder: string = 'asc',
+    search: string = '',
   ): Promise<any> {
     try {
       const skip = (page - 1) * size;
@@ -40,6 +40,9 @@ export class InventoryService {
       // Build sort options
       const sortOptions = { [sortBy]: sortOrder === 'asc' ? <SortOrder>'asc' : 'desc' };
 
+      // Fetch the total count of items that match the filter (before pagination)
+      const totalItems = await this.inventoryModel.countDocuments(filter).exec();
+
       // Fetch the inventory items from the database with pagination, filtering, and sorting
       const items = await this.inventoryModel
         .find(filter)
@@ -48,10 +51,11 @@ export class InventoryService {
         .skip(skip)
         .exec();
 
-      // Return success response
+      // Return success response including totalItems count
       return {
         success: true,
         data: items,
+        totalItems,   // Include total items count in the response
         error: null,
       };
     } catch (error) {

@@ -12,8 +12,8 @@ export class InventoryService {
 
   constructor(private http: HttpClient) {}
 
-  getInventories(page: number, size: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}?page=${page}&size=${size}`);
+  getInventories(page: number, size: number, sortBy: string, sortOrder: "asc" | "desc", search: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}?page=${page}&size=${size}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${search}`);
   }
 
   getInventoryById(sku: string): Observable<Inventory> {

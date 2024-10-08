@@ -1,16 +1,19 @@
 <div class="login-container">
     <h2 class="login-title">Welcome Back!</h2>
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        <mat-form-field appearance="fill" class="form-field">
-            <mat-label>Username</mat-label>
+
+        <label>Username</label>
+        <mat-form-field appearance="outline" class="form-field">
+            <!-- <mat-label>Username</mat-label> -->
             <input matInput placeholder="Enter your username" formControlName="username" />
             <mat-error *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
                 Username is required.
             </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="fill" class="form-field">
-            <mat-label>Password</mat-label>
+        <label>Password</label>
+        <mat-form-field appearance="outline" class="form-field">
+            <!-- <mat-label>Password</mat-label> -->
             <input matInput type="password" placeholder="Enter your password" formControlName="password" />
             <mat-error *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
                 Password is required.

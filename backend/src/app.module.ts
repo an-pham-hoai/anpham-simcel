@@ -27,7 +27,7 @@ import { SeedModule } from './seed/seed.module';
     // Configure rate limiting globally
     ThrottlerModule.forRoot([{
       ttl: 60000, // Time-to-live for rate limit (in milliseconds)
-      limit: 10, // Maximum number of requests within the ttl
+      limit: 60, // Maximum number of requests within the ttl
     }]),
     InventoryModule,
     OrderModule,

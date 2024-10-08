@@ -5,10 +5,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { Inventory } from './inventory.model';
 import { InventoryService } from './inventory.service';
 import { InventoryDialogComponent } from './inventory-dialog/inventory-dialog.component';
-import { CommonModule } from '@angular/common';
-import { MatSortModule } from '@angular/material/sort';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
+import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   standalone: true,
@@ -21,6 +24,9 @@ import { MatButtonModule } from '@angular/material/button';
     MatTableModule,
     MatSortModule,
     MatButtonModule,
+    MatFormFieldModule,
+    MatProgressBarModule,
+    MatInputModule,
     // Add other Material modules as needed
   ],
 })
@@ -30,22 +36,37 @@ export class InventoryComponent implements OnInit {
   totalItems = 0;
   pageSize = 10;
   pageIndex = 0;
+  sortBy = 'sku';
+  sortOrder: 'asc' | 'desc' = 'asc';
+  searchQuery = '';
+  loading = false;
 
   constructor(
-    private inventoryService: InventoryService, 
+    private inventoryService: InventoryService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar // Inject MatSnackBar
-  ) { }
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.loadInventory();
   }
 
   loadInventory(): void {
-    this.inventoryService.getInventories(this.pageIndex + 1, this.pageSize).subscribe(response => {
-      this.dataSource.data = response.data;
-      this.totalItems = this.dataSource.data.length;
-    });
+    this.loading = true;
+    this.inventoryService
+      .getInventories(this.pageIndex + 1, this.pageSize, this.sortBy, this.sortOrder, this.searchQuery)
+      .subscribe({
+        next: (response) => {
+          this.dataSource.data = response.data;
+          this.totalItems = response.totalItems;
+          this.loading = false;
+          console.log('next', response.data);
+        },
+        error: () => {
+          this.snackBar.open('Failed to load inventory data', 'Close', { duration: 3000 });
+          this.loading = false;
+        },
+      });
   }
 
   onPageChange(event: PageEvent): void {
@@ -54,7 +75,20 @@ export class InventoryComponent implements OnInit {
     this.loadInventory();
   }
 
-  openCreateDialog() {
+  onSearchChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchQuery = target.value.trim().toLowerCase();
+    this.pageIndex = 0; // Reset to first page when searching
+    this.loadInventory();
+  }
+
+  onSortChange(sort: Sort): void {
+    this.sortBy = sort.active;
+    this.sortOrder = sort.direction || 'asc'; // Default to ascending if no sort order
+    this.loadInventory();
+  }
+
+  openCreateDialog(): void {
     const dialogRef = this.dialog.open(InventoryDialogComponent, {
       width: '400px',
     });
@@ -67,14 +101,13 @@ export class InventoryComponent implements OnInit {
   }
 
   onEditInventory(inventory: Inventory): void {
-
     this.inventoryService.getInventoryById(inventory.sku).subscribe({
       next: (inventory: any) => {
         const dialogRef = this.dialog.open(InventoryDialogComponent, {
           width: '400px',
-          data: inventory.data, // Pass the fetched inventory data to the dialog
+          data: inventory.data,
         });
-  
+
         dialogRef.afterClosed().subscribe((result) => {
           if (result) {
             this.loadInventory(); // Refresh the inventory list after closing the dialog
@@ -83,9 +116,8 @@ export class InventoryComponent implements OnInit {
       },
       error: () => {
         this.snackBar.open('Failed to fetch inventory details', 'Close', { duration: 3000 });
-      }
+      },
     });
-
   }
 
   onDeleteInventory(sku: string): void {
