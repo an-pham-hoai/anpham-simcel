@@ -24,16 +24,4 @@ ENV MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
 # Build and start the application
 RUN npm run build
 
-FROM nginx:alpine
-
-# Copy the built Angular app from the build stage
-COPY --from=build /app/dist/backend /usr/share/nginx/html
-
-# Copy the nginx configuration file (optional, if you need custom configuration)
-# COPY nginx.conf /etc/nginx/nginx.conf
-
-# Expose port 80
-EXPOSE 3000
-
-# Start Nginx server
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "run", "start:prod"]

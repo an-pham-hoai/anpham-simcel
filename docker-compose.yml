@@ -13,13 +13,13 @@ services:
     depends_on:
       - mongodb
 
-  #frontend:
-    #container_name: simcel-frontend
-    #build: ./frontend
-    #ports:
-      #- "4200:4200"
-    #depends_on:
-      #- backend
+  frontend:
+    container_name: simcel-frontend
+    build: ./frontend
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
 
   mongodb:
     image: mongo:latest
