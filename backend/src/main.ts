@@ -67,6 +67,8 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3000; // Default to 3000 if not specified
-  await app.listen(port);
+  await app.listen(port, "0.0.0.0", () => {
+    console.log(`Backend web server started with port: ${port}`);
+  });
 }
 bootstrap();

@@ -18,10 +18,12 @@ import { SeedModule } from './seed/seed.module';
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_CONNECTION_STRING') || 
-        process.env.MONGO_CONNECTION_STRING, //mongodb://localhost:27017/simceldb
-      }),
+      useFactory: async (configService: ConfigService) => {
+        let conn = configService.get<string>('MONGO_CONNECTION_STRING') || 
+        process.env.MONGO_CONNECTION_STRING; //mongodb://localhost:27017/simceldb
+        console.log('mongodb conn', conn);
+        return { uri: conn }
+      },
       inject: [ConfigService],
     }),
     // Configure rate limiting globally

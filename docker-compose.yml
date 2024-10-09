@@ -2,25 +2,30 @@ version: '3.7'
 services:
   backend:
     container_name: simcel-backend
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production 
+        MONGO_CONNECTION_STRING: mongodb://mongodb:27017/simceldb
     ports:
-      - '3000:3000'
+      - "3000:3000"
     depends_on:
       - mongodb
 
-  frontend:
-    container_name: simcel-frontend
-    build: ./frontend
-    ports:
-      - '4200:80'
-    depends_on:
-      - backend
+  #frontend:
+    #container_name: simcel-frontend
+    #build: ./frontend
+    #ports:
+      #- "4200:4200"
+    #depends_on:
+      #- backend
 
   mongodb:
     image: mongo:latest
     container_name: mongodb
     ports:
-      - '27017:27017'
+      - "27017:27017"
     volumes:
       - mongo-data:/data/db
 
