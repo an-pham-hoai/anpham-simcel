@@ -122,4 +122,11 @@ export class InventoryService {
     // Return true if SKU is unique (i.e., not found in the database)
     return !inventoryItem;
   }
+
+  // Fetch available SKUs from inventory
+  async getAvailableSkus(): Promise<string[]> {
+    const inventoryItems = await this.inventoryModel.find({}, { sku: 1 }).exec();  // Get only the SKU field
+    console.log('getAvailableSkus', inventoryItems);
+    return inventoryItems.map(item => item.sku);
+  }
 }

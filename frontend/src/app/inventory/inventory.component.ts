@@ -17,7 +17,7 @@ import { MatInputModule } from '@angular/material/input';
   standalone: true,
   selector: 'app-inventory',
   templateUrl: './inventory.component.html',
-  styleUrls: ['./inventory.component.scss'],
+  styleUrls: ['./inventory.component.css'],
   imports: [
     CommonModule,
     MatPaginatorModule,  // Ensure MatPaginatorModule is imported

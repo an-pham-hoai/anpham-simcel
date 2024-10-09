@@ -40,7 +40,7 @@ export class InventoryDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: Inventory,
     private inventoryService: InventoryService,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.isEdit = !!this.data; // If data exists, we are in edit mode
@@ -51,7 +51,7 @@ export class InventoryDialogComponent implements OnInit {
     }
   }
 
-  r(s: any):boolean {
+  r(s: any): boolean {
     return s != null && s.toString().trim().length > 0;
   }
 
@@ -86,7 +86,7 @@ export class InventoryDialogComponent implements OnInit {
 
   // Validate the form before submitting
   private validateForm(): boolean {
-    if (!this.r(this.inventory.sku) || !this.r(this.inventory.name) || 
+    if (!this.r(this.inventory.sku) || !this.r(this.inventory.name) ||
       !this.r(this.inventory.quantity) || !this.r(this.inventory.location)) {
       this.formError = 'All fields are required';
       return false;

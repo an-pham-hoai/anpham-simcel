@@ -36,4 +36,9 @@ export class InventoryService {
   deleteInventory(sku: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${sku}`);
   }
+
+  // Fetch available SKUs from the backend
+  getAvailableSkus(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/available/skus`);
+  }
 }

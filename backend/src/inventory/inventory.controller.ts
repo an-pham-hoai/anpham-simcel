@@ -110,4 +110,12 @@ export class InventoryController {
   async checkSkuUnique(@Param('sku') sku: string): Promise<boolean> {
     return this.inventoryService.isSkuUnique(sku);
   }
+
+  // Endpoint to get available SKUs
+  @Version('1')
+  @Get('available/skus')
+  async getAvailableSkus(): Promise<string[]> {
+    console.log('hit', 'getAvailableSkus');
+    return this.inventoryService.getAvailableSkus();
+  }
 }

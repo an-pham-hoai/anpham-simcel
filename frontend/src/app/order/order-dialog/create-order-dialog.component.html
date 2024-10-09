@@ -1,0 +1,65 @@
+<h1 mat-dialog-title>{{ isEditMode ? 'Edit Order' : 'Create Order' }}</h1>
+<div mat-dialog-content>
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Order Number</mat-label>
+      <input matInput [(ngModel)]="order.orderNumber" required />
+    </mat-form-field>
+  </div>
+  
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Customer Name</mat-label>
+      <input matInput [(ngModel)]="order.customerName" required />
+    </mat-form-field>
+  </div>
+
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Status</mat-label>
+      <mat-select [(ngModel)]="order.status">
+        <mat-option value="pending">Pending</mat-option>
+        <mat-option value="fulfilled">Fulfilled</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <h3>Order Items</h3>
+  <div *ngFor="let item of order.items; let i = index" class="order-item" style="display: flex; gap: 15px;">
+    <!-- SKU Dropdown -->
+    <mat-form-field appearance="fill" style="flex: 1;">
+      <mat-label>SKU</mat-label>
+      <mat-select [(ngModel)]="item.sku" required>
+        <mat-option *ngFor="let sku of availableSkus" [value]="sku">{{ sku }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    
+    <!-- Quantity Input -->
+    <mat-form-field appearance="fill" style="flex: 1;">
+      <mat-label>Quantity</mat-label>
+      <input matInput type="number" [(ngModel)]="item.quantity" min="1" required />
+    </mat-form-field>
+
+    <!-- Price Input -->
+    <mat-form-field appearance="fill" style="flex: 1;">
+      <mat-label>Price</mat-label>
+      <input matInput type="number" [(ngModel)]="item.price" min="0" required />
+    </mat-form-field>
+
+    <!-- Remove Item Button -->
+    <button mat-icon-button (click)="removeOrderItem(i)" [disabled]="order.items.length === 1">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+
+  <button mat-stroked-button (click)="addOrderItem()">Add Item</button>
+
+  <div>
+    <strong>Total Amount: {{ calculateTotalAmount() | currency }}</strong>
+  </div>
+</div>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="closeDialog()">Cancel</button>
+  <button mat-button (click)="saveOrder()" [disabled]="!order.orderNumber || !order.customerName">Save</button>
+</div>

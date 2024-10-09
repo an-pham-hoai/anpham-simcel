@@ -107,54 +107,63 @@ export class OrderService {
     }
   }
 
+  /**
+   * Find all orders with pagination, sorting, and optional search.
+   * @param page The page number (default is 1).
+   * @param size The number of items per page (default is 10).
+   * @param sortBy The field to sort by (default is 'createdAt').
+   * @param sortOrder The sort order ('asc' for ascending, 'desc' for descending).
+   * @param search Optional search term to filter items by customer name, order number, or status.
+   */
   async findAll(
-    page: number = 1,   // Default to page 1
-    size: number = 10,  // Default size to 10 items per page
-    sortBy: string = 'createdAt', // Default sort by createdAt field
-    sortOrder: string = 'asc',    // Default sort order is ascending
-    search: string = '',          // Optional search term for filtering
+    page: number = 1,
+    size: number = 10,
+    sortBy: string = 'createdAt',
+    sortOrder: string = 'asc',
+    search: string = ''
   ): Promise<any> {
     try {
       const skip = (page - 1) * size;
-      const sortOptions = { [sortBy]: sortOrder === 'asc' ? <SortOrder>'asc' : <SortOrder>'desc' };
 
-      // Build the filter query based on search input
-      const searchQuery = search
+      // Build the filter object to search by customer name, order number, or status
+      const filter = search
         ? {
           $or: [
-            { orderNumber: { $regex: search, $options: 'i' } },  // Case-insensitive search on orderNumber
-            { customerName: { $regex: search, $options: 'i' } }, // Case-insensitive search on customerName
-            { status: { $regex: search, $options: 'i' } },       // Case-insensitive search on status
+            { customerName: { $regex: search, $options: 'i' } },   // Case-insensitive search for customer name
+            { orderNumber: { $regex: search, $options: 'i' } },    // Case-insensitive search for order number
+            { status: { $regex: search, $options: 'i' } },         // Case-insensitive search for order status
           ],
         }
         : {};
 
-      // Get total count of documents with the search filter applied
-      const total = await this.orderModel.countDocuments(searchQuery);
+      // Build sort options
+      const sortOptions = { [sortBy]: sortOrder === 'asc' ? <SortOrder>'asc' : 'desc' };
 
-      // Get paginated and filtered data
+      // Fetch the total count of orders that match the filter (before pagination)
+      const totalItems = await this.orderModel.countDocuments(filter).exec();
+
+      // Fetch the orders from the database with pagination, filtering, and sorting
       const items = await this.orderModel
-        .find(searchQuery)
-        .skip(skip)   // Skip the first 'n' documents
-        .limit(size)  // Limit the number of results
-        .sort(sortOptions) // Sort by the specified field and order
+        .find(filter)
+        .sort(sortOptions)
+        .limit(size)
+        .skip(skip)
         .exec();
 
-      // Return success response
+      // Return success response including totalItems count
       return {
         success: true,
         data: items,
+        totalItems,   // Include total items count in the response
         error: null,
       };
-    }
-    catch (error) {
-      // Handle any errors during fetching
+    } catch (error) {
       return {
         success: false,
         data: null,
         error: {
           code: 'FETCH_ERROR',
-          message: error.message || 'An error occurred while fetching inventory items.',
+          message: error.message || 'An error occurred while fetching orders.',
         },
       };
     }
