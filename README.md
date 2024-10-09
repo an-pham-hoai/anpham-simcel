@@ -62,9 +62,8 @@ Make sure you have the following installed:
    ```
 
 ## Running the Project By Docker
-    ```bash
-    docker-compose up -d --build
-    ```
+   
+   docker-compose up -d --build
 
 ## Running the Project Manually
 
