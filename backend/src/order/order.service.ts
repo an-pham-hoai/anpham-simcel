@@ -17,8 +17,37 @@ export class OrderService {
 
   async create(createOrderDto: CreateOrderDto): Promise<any> {
     try {
-      // 1. Create the order
-      const newOrder = new this.orderModel(createOrderDto);
+      // Step 0: Fetch the corresponding inventory items by SKU
+      const { orderNumber, customerName, items } = createOrderDto;
+
+      const inventoryIds = [];
+      let totalQuantity = 0;
+
+      for (const item of items) {
+        const inventoryItem = await this.inventoryService.findOne(item.sku);  // Find inventory by SKU
+        if (!inventoryItem.data) {
+          throw new Error(`Inventory item with SKU ${item.sku} not found`);
+        }
+
+        inventoryIds.push({
+          _id: inventoryItem.data._id,   // Use ObjectId reference
+          quantity: item.quantity,  // Keep the quantity from the order
+        });
+
+        totalQuantity += item.quantity;  // Sum up totalQuantity
+      }
+
+      // Construct the new order with inventory ObjectId references
+      const newOrder = new this.orderModel({
+        orderNumber,
+        customerName,
+        items: inventoryIds.map(item => item._id),  // Extract only ObjectId references for items
+        totalQuantity,
+        status: 'pending',  // Set default status as 'pending'
+        orderDate: new Date(),
+      });
+
+      // 1. Save the order
       const createdOrder = await newOrder.save();
 
       // 2. Update the inventory quantities
@@ -52,7 +81,7 @@ export class OrderService {
         // Deduct the quantity from the inventory
         inventoryItem.data.quantity -= item.quantity;
 
-        // Save the updated inventory item within the transaction
+        // Save the updated inventory item 
         await inventoryItem.data.save();
       }
 
@@ -143,20 +172,38 @@ export class OrderService {
       const totalItems = await this.orderModel.countDocuments(filter).exec();
 
       // Fetch the orders from the database with pagination, filtering, and sorting
-      const items = await this.orderModel
+      const orders = await this.orderModel
         .find(filter)
         .sort(sortOptions)
         .limit(size)
         .skip(skip)
+        .populate('items', 'sku price') // Populate the items field with actual inventory data
         .exec();
+
+      console.log('orders', orders);
+
+      const formattedOrders = orders.map(order => {
+        return {
+          orderNumber: order.orderNumber,
+          customerName: order.customerName,
+          totalQuantity: order.totalQuantity,
+          orderDate: order.orderDate,
+          status: order.status,
+          items: order.items.map(item => ({
+            sku: item.sku,
+            quantity: item.quantity,  // You need to ensure `quantity` is part of the `items` array in the Order schema
+          })),
+        };
+      });
 
       // Return success response including totalItems count
       return {
         success: true,
-        data: items,
+        data: formattedOrders,
         totalItems,   // Include total items count in the response
         error: null,
       };
+
     } catch (error) {
       return {
         success: false,

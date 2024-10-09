@@ -14,10 +14,10 @@ export class OrderService {
 
   // Fetch all orders with pagination, sorting, and optional search
   getOrders(
-    page: number = 1, 
-    size: number = 10, 
-    sortBy: string = 'createdAt', 
-    sortOrder: 'asc' | 'desc' = 'asc', 
+    page: number = 1,
+    size: number = 10,
+    sortBy: string = 'createdAt',
+    sortOrder: 'asc' | 'desc' = 'asc',
     search: string = ''
   ): Observable<any> {
     let params = new HttpParams()
@@ -25,7 +25,7 @@ export class OrderService {
       .set('size', size.toString())
       .set('sortBy', sortBy)
       .set('sortOrder', sortOrder);
-    
+
     if (search) {
       params = params.set('search', search);
     }
@@ -40,7 +40,16 @@ export class OrderService {
 
   // Create a new order
   createOrder(order: Order): Observable<Order> {
-    return this.http.post<Order>(`${this.baseUrl}`, order);
+    let { totalAmount, status, ...orderDto } = order;
+    let itemsDto: any[] = [];
+
+    orderDto.items.forEach(item => {
+      let {price, ...itemDto} = item;
+      itemsDto.push(itemDto);
+    });
+
+    orderDto.items = itemsDto;
+    return this.http.post<Order>(`${this.baseUrl}`, orderDto);
   }
 
   // Update an existing order

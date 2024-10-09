@@ -115,7 +115,7 @@ export class InventoryController {
   @Version('1')
   @Get('available/skus')
   async getAvailableSkus(): Promise<string[]> {
-    console.log('hit', 'getAvailableSkus');
+    //console.log('hit', 'getAvailableSkus');
     return this.inventoryService.getAvailableSkus();
   }
 }

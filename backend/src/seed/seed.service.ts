@@ -48,7 +48,7 @@ export class SeedService {
     }
     else {
       // Mock Orders
-      const inventoryItems = await this.inventoryService.findAll(1, 1000); // Fetch all inventory items
+      const inventoryItems = await this.inventoryService.findAll(1, 10000000); // Fetch all inventory items
       const itemMap = new Map(); // Map SKU to the Inventory item ObjectId
 
       for (const item of inventoryItems.data) {

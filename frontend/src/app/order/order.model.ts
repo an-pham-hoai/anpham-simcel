@@ -4,7 +4,7 @@ export interface Order {
     customerName: string;
     items: any[];  // This could be a more detailed structure depending on backend schema
     status: string;
-    totalQuantity: number;
+    totalAmount: number;
     createdAt: Date;
     updatedAt: Date;
   }

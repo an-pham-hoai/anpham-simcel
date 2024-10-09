@@ -126,7 +126,7 @@ export class InventoryService {
   // Fetch available SKUs from inventory
   async getAvailableSkus(): Promise<string[]> {
     const inventoryItems = await this.inventoryModel.find({}, { sku: 1 }).exec();  // Get only the SKU field
-    console.log('getAvailableSkus', inventoryItems);
+    //console.log('getAvailableSkus', inventoryItems);
     return inventoryItems.map(item => item.sku);
   }
 }
