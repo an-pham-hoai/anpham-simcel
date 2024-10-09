@@ -1,4 +1,3 @@
-Here’s the complete README content in a single text box, ensuring everything is included:
 
 ```
 # Inventory Management System
