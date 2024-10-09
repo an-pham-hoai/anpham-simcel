@@ -1,5 +1,5 @@
 
-```
+
 # Inventory Management System
 
 ## Table of Contents
