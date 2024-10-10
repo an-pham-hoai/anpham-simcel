@@ -61,11 +61,11 @@ Make sure you have the following installed:
    npm install
    ```
 
-## Running the Project By Docker
+## Running the Project By Docker (1st option)
    
    docker-compose up -d --build
 
-## Running the Project Manually
+## Running the Project Manually (2nd option)
 
 ### Start the Backend
 
@@ -94,3 +94,8 @@ Make sure you have the following installed:
 ### Access the Application
 - The frontend will typically run at `http://localhost:4200`.
 - The backend API will typically be accessible at `http://localhost:3000`.
+
+### Logins
+There are 2 mock users that can be used to login:
+admin/go
+user/me
