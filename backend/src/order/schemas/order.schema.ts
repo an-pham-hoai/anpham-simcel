@@ -2,6 +2,7 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as mongoose from 'mongoose';  // Import mongoose for ObjectId
 import { Inventory } from '../../inventory/schemas/inventory.schema';
+import { OrderItem, OrderItemSchema } from './order.item.schema';
 
 @Schema({ timestamps: true })  // Enable timestamps
 export class Order extends Document {
@@ -11,8 +12,11 @@ export class Order extends Document {
   @Prop({ required: true, index: true })  // Add index for customer-based queries
   customerName: string;
 
-  @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Inventory', index: true }])  // Index ObjectId references to Inventory
-  items: Inventory[];
+  /* @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Inventory', index: true }])  // Index ObjectId references to Inventory
+  items: Inventory[]; */
+
+  @Prop({ type: [OrderItemSchema], required: true })
+  items: OrderItem[]; // Array of items, each with item and itemQuantity
 
   @Prop({ required: true })
   totalQuantity: number;

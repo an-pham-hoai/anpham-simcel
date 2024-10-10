@@ -5,6 +5,7 @@ import { Order } from './schemas/order.schema';
 import { InventoryService } from '../inventory/inventory.service';
 import { WrapperResponse } from 'src/common/wrapper-response';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { OrderItem } from './schemas/order.item.schema';
 
 @Injectable()
 export class OrderService {
@@ -17,10 +18,11 @@ export class OrderService {
 
   async create(createOrderDto: CreateOrderDto): Promise<any> {
     try {
+      this.logger.log('order create', createOrderDto);
       // Step 0: Fetch the corresponding inventory items by SKU
       const { orderNumber, customerName, items } = createOrderDto;
 
-      const inventoryIds = [];
+      const inventoryItems = [];
       let totalQuantity = 0;
 
       for (const item of items) {
@@ -29,9 +31,11 @@ export class OrderService {
           throw new Error(`Inventory item with SKU ${item.sku} not found`);
         }
 
-        inventoryIds.push({
-          _id: inventoryItem.data._id,   // Use ObjectId reference
-          quantity: item.quantity,  // Keep the quantity from the order
+        // Add inventory ID and quantity to the order item
+        inventoryItems.push({
+          inventoryId: inventoryItem.data._id,   // Use ObjectId reference
+          sku: inventoryItem.data.sku,
+          quantity: item.quantity,  // Store the quantity from the order
         });
 
         totalQuantity += item.quantity;  // Sum up totalQuantity
@@ -41,12 +45,13 @@ export class OrderService {
       const newOrder = new this.orderModel({
         orderNumber,
         customerName,
-        items: inventoryIds.map(item => item._id),  // Extract only ObjectId references for items
+        items: inventoryItems,
         totalQuantity,
         status: 'pending',  // Set default status as 'pending'
         orderDate: new Date(),
       });
 
+      console.log('new order', newOrder);
       // 1. Save the order
       const createdOrder = await newOrder.save();
 
@@ -184,6 +189,7 @@ export class OrderService {
 
       const formattedOrders = orders.map(order => {
         return {
+          id: order.id,
           orderNumber: order.orderNumber,
           customerName: order.customerName,
           totalQuantity: order.totalQuantity,

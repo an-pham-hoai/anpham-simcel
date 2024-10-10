@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InventoryService } from '../inventory/inventory.service';
 import { OrderService } from 'src/order/order.service';
+import { Order } from 'src/order/schemas/order.schema';
 
 @Injectable()
 export class SeedService {
@@ -42,7 +43,19 @@ export class SeedService {
     }
 
     // Check if there is already data in Order collection
-    const existingOrders = await this.ordersService.findAll(1, 1000);
+    let existingOrders = await this.ordersService.findAll(1, 10000000);
+    if (!existingOrders.data) {
+      this.logger.log('existingOrders null', existingOrders);
+      return;
+    }
+    existingOrders.data.forEach(async (order: Order) => {
+      if (!order.items || order.items.length == 0 || !order.items[0].sku){
+        await this.ordersService.deleteOrder(order.id as any);
+        this.logger.log('seed delete order', order);
+      }
+    });
+
+    existingOrders = await this.ordersService.findAll(1, 10000000);
     if (existingOrders.data?.length > 0) {
       this.logger.log('Orders already seeded. Skipping seeding process.');
     }
@@ -68,7 +81,7 @@ export class SeedService {
         return {
           ...order,
           items: order.items.map(item => ({
-            _id: itemMap.get(item.sku), // Use the ObjectId reference
+            inventoryId: itemMap.get(item.sku), // Use the ObjectId reference
             sku: item.sku,
             quantity: item.quantity
           })),

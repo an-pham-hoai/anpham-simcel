@@ -40,12 +40,6 @@
       <input matInput type="number" [(ngModel)]="item.quantity" min="1" required />
     </mat-form-field>
 
-    <!-- Price Input -->
-    <mat-form-field appearance="fill" style="flex: 1;">
-      <mat-label>Price</mat-label>
-      <input matInput type="number" [(ngModel)]="item.price" min="0" required />
-    </mat-form-field>
-
     <!-- Remove Item Button -->
     <button mat-icon-button (click)="removeOrderItem(i)" [disabled]="order.items.length === 1">
       <mat-icon>delete</mat-icon>
@@ -55,7 +49,7 @@
   <button mat-stroked-button (click)="addOrderItem()">Add Item</button>
 
   <div>
-    <strong>Total Amount: {{ calculateTotalAmount() | currency }}</strong>
+    <strong>Total Quantity: {{ calculateTotalAmount() }}</strong>
   </div>
 </div>
 

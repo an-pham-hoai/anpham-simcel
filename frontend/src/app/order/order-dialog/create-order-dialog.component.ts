@@ -8,8 +8,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { OrderService } from '../order.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Order } from '../order.model';
-import { OrderItemDto } from '../dto/order-item-dto';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { InventoryService } from '../../inventory/inventory.service';
@@ -55,6 +53,7 @@ export class CreateOrderDialogComponent implements OnInit {
         if (this.data && this.data.order) {
             this.isEditMode = true;
             this.order = { ...this.data.order }; // Load order data for edit mode
+            console.log('edit order', this.order);
         } else {
             this.addOrderItem(); // Start with one order item for new orders
         }
@@ -87,13 +86,13 @@ export class CreateOrderDialogComponent implements OnInit {
 
     // Calculate the total amount based on items
     calculateTotalAmount(): number {
-        return this.order.items.reduce((total: any, item: any) => total + (item.quantity * item.price), 0);
+        return this.order.items.reduce((total: any, item: any) => total + (item.quantity), 0);
     }
 
     // Submit order (create or update)
     saveOrder(): void {
-        if (!this.order.orderNumber || !this.order.customerName || this.order.items.some((item: any) => !item.sku || item.quantity <= 0 || item.price <= 0)) {
-            this.snackBar.open('Please fill all required fields and ensure quantities and prices are positive.', 'Close', {
+        if (!this.order.orderNumber || !this.order.customerName || this.order.items.some((item: any) => !item.sku || item.quantity <= 0)) {
+            this.snackBar.open('Please fill all required fields and ensure quantities are positive.', 'Close', {
                 duration: 3000,
             });
             return;

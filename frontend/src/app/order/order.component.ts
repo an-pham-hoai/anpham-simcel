@@ -98,7 +98,8 @@ export class OrderComponent implements OnInit {
 
   // Edit order logic
   editOrder(orderId: string): void {
-    const order = this.dataSource.data.find((order: any) => order._id === orderId);
+    const order = this.dataSource.data.find((order: any) => order.id === orderId);
+    console.log('edit order--', orderId, order);
 
     const dialogRef = this.dialog.open(CreateOrderDialogComponent, {
       width: '700px',
