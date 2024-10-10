@@ -12,7 +12,22 @@ export class ReportService {
   ) {}
 
   async getInventoryReport() {
-    const inventoryLevels = await this.inventoryModel.find().exec();
+    const inventoryLevels = await this.inventoryModel.aggregate([
+      {
+        $group: {
+          _id: '$location', // Group by warehouse
+          totalQuantity: { $sum: '$quantity' }, // Sum the quantity in each warehouse
+        },
+      },
+      {
+        $project: {
+          warehouse: '$_id',
+          totalQuantity: 1,
+          _id: 0,
+        },
+      },
+    ]).exec();
+
     const lowStockItems = await this.inventoryModel.find({ quantity: { $lt: 10 } }).exec(); // Customize the threshold
 
     return {
