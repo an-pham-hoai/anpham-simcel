@@ -26,6 +26,7 @@ jobs:
         docker build \
           --build-arg PORT=${{ env.PORT }} \
           --build-arg MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING || '' }} \
+          -f backend/Dockerfile \
           -t ghcr.io/${{ github.repository }}/nestjs-backend:${SHORT_SHA} .
         docker tag ghcr.io/${{ github.repository }}/nestjs-backend:${SHORT_SHA} ghcr.io/${{ github.repository }}/nestjs-backend:latest
         docker push ghcr.io/${{ github.repository }}/nestjs-backend:${SHORT_SHA}
