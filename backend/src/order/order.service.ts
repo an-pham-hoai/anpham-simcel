@@ -180,7 +180,7 @@ export class OrderService {
         .populate('items', 'sku price') // Populate the items field with actual inventory data
         .exec();
 
-      console.log('orders', orders);
+      //console.log('orders', orders);
 
       const formattedOrders = orders.map(order => {
         return {

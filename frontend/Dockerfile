@@ -16,17 +16,8 @@ COPY . .
 # Build the Angular app with production configuration
 RUN npm run build --prod
 
-# Step 2: Production Stage
-FROM nginx:alpine
-
-# Copy the built Angular app from the build stage
-COPY --from=build /app/dist/frontend /usr/share/nginx/html
-
-# Copy the nginx configuration file (optional, if you need custom configuration)
-# COPY nginx.conf /etc/nginx/nginx.conf
-
 # Expose port 80
 EXPOSE 4200
 
-# Start Nginx server
-CMD ["nginx", "-g", "daemon off;"]
+# Run the Angular app using ng serve, for production, use nginx instead
+CMD ["npm", "run", "start"]

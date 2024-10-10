@@ -24,4 +24,5 @@ ENV MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
 # Build and start the application
 RUN npm run build
 
+# For production, use nginx instead
 CMD ["npm", "run", "start:prod"]
