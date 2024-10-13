@@ -37,16 +37,15 @@ export class ReportComponent implements OnInit {
     levelDisplayedColumns: string[] = ['warehouse', 'totalQuantity'];
     levelDataSource: any;
     levelTotalLength: number = 0;
-
-    displayedColumns: string[] = ['month', 'year', 'totalOrders', 'totalQuantity'];
-    dataSource?: any;
-
-    totalLength = 0;
-    pageSize = 10;
-
-    @ViewChild(MatPaginator) paginator?: MatPaginator;
-
+    levelPageSize = 5;
+    @ViewChild('levelSort') levelSort?: MatSort;
     @ViewChild('levelPaginator') levelPaginator?: MatPaginator;
+
+    salesDisplayedColumns: string[] = ['month', 'year', 'totalOrders', 'totalQuantity'];
+    salesDataSource?: any;
+    salesTotalLength = 0;
+    salesPageSize = 10;
+    @ViewChild(MatPaginator) paginator?: MatPaginator;
     @ViewChild(MatSort) sort?: MatSort;
 
     inventoryReport: any[] = [];
@@ -74,10 +73,10 @@ export class ReportComponent implements OnInit {
                 next: (response) => {
                     this.loading = false;
                     console.log('next', response);
-
                     this.levelDataSource = new MatTableDataSource(response.inventoryLevels);
                     this.levelTotalLength = response.inventoryLevels.length;
                     this.levelDataSource.paginator = this.levelPaginator as any;
+                    this.levelDataSource.sort = this.levelSort;
 
                     this.lowStockItems = response.lowStockItems;
                 },
@@ -93,10 +92,10 @@ export class ReportComponent implements OnInit {
                 next: (data) => {
                     this.loading = false;
                     console.log('next', data);
-                    this.dataSource = new MatTableDataSource(data);
-                    this.totalLength = data.length;
-                    this.dataSource.paginator = this.paginator as any;
-                    this.dataSource.sort = this.sort as any;
+                    this.salesDataSource = new MatTableDataSource(data);
+                    this.salesTotalLength = data.length;
+                    this.salesDataSource.paginator = this.paginator as any;
+                    this.salesDataSource.sort = this.sort as any;
                 },
                 error: () => {
                     this.snackBar.open('Failed to load sales report', 'Close', { duration: 3000 });
